@@ -1,12 +1,5 @@
 var GameSparksAdminSocket = new require('./GameSparksAdminSocket').socket;
-
-try {
-  var poolModule = require('generic-pool');
-} catch( err ) {
-  console.log( "FATAL: Please run \"npm install generic-pool\" before trying to run this script." );
-  process.exit(1);
-}
-
+var poolModule = require('./generic-pool');
 var pool = null;
 var socketNumber = 0;
 var inited = false;
