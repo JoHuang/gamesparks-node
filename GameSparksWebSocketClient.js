@@ -1,7 +1,9 @@
-/**
- * New node file
- */
-var WebSocketClient = require('./WorlizeWebSocketNode/websocket').client;
+try {
+	var WebSocketClient = require('websocket').client;
+} catch( err ) {
+  console.log( "FATAL: Please run \"npm install websocket\" before trying to run this script." );
+  process.exit(1);
+}
 
 exports.WebSocket = function(uri) {
 
