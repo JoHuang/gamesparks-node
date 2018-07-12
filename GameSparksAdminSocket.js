@@ -181,7 +181,8 @@ exports.socket = function() {
 				var requestId = result.requestId;
 				if (pendingRequests[requestId]) {
 					pendingRequests[requestId](result);
-					pendingRequests[requestId] = null;
+					//pendingRequests[requestId] = null;
+					delete pendingRequests[requestId];
 				}
 			}
 		} else {
