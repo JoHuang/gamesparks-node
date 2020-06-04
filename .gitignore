@@ -1,4 +1,5 @@
 *~
 node_modules
 example/config.json
+example/secret.js
 client-server/config.json

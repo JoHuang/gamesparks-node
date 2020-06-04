@@ -101,3 +101,4 @@ exports.sendAsDepricated = function( playerId, requestType, data, onResponse, on
   });
 };
 
+exports.Listener = require('./GameSparksListener');

@@ -24,6 +24,10 @@ exports.socket = function() {
 	
 	var requestCount = 0;
 
+	var watchDogInterval;
+	var watchDogTimerId;
+	var lastTimeMessageReceived = 0;
+
 	this.init = function(options) {
 		socketUrl = options.url;
 		locatorUrl = options.url;
@@ -33,6 +37,10 @@ exports.socket = function() {
 		errorCallback = options.onError;
 		debug = options.debug;
 		socketNumber = options.socketNumber;
+		watchDogInterval = options.watchDogInterval || 0;
+		if (debug) {
+			console.log("init "  + options.socketNumber);
+		}
 
 		initialised = false;
 		connected = false;
@@ -102,6 +110,10 @@ exports.socket = function() {
 			webSocket.onClose = null;
 			webSocket.close();
 		}
+		if (watchDogTimerId) {
+			clearInterval(watchDogTimerId);
+			watchDogTimerId = null;
+		}
 	}
 
 	function getWebSocket(location) {
@@ -114,23 +126,35 @@ exports.socket = function() {
 		webSocket.onclose = onWebSocketClose;
 		webSocket.onerror = onWebSocketError;
 		webSocket.onmessage = onWebSocketMessage;
+
+		if (!watchDogTimerId && watchDogInterval > 0) {
+			watchDogTimerId = setInterval( ()=> {
+				const ago = Date.now() - lastTimeMessageReceived;
+				if (debug) {
+					console.log("check lastTimeMessageReceived",ago);
+				}
+				if (ago > watchDogInterval) {
+					onWebSocketError( new Error( "WATCH_DOG_ERROR"));
+				}
+			}, watchDogInterval);
+		}
 	}
 
-	function onWebSocketError(error) {
+	function onWebSocketError(err) {
 		
 		//On Windows / Azure there is a chance we get an ECONNRESET as well as a close.
-		if(error && error.code === "ECONNRESET"){
+		if(err && err.code === "ECONNRESET"){
 			return;
 		}
 		
 		socketUrl = locatorUrl;
 		connected = false;
 		
-		if (errorCallback && !initialised) {
+		if (errorCallback && (!initialised || (err && err.message === "WATCH_DOG_ERROR"))) {
 			if (debug) {
-				console.log('WebSocket onError:' + JSON.stringify(error));
+				console.log('WebSocket onError:' + JSON.stringify(err));
 			}
-			errorCallback(error);
+			errorCallback(err);
 		}
 		error = true;
 	}
@@ -188,6 +212,8 @@ exports.socket = function() {
 		} else {
 			messageCallback(result);
 		}
+
+		lastTimeMessageReceived = Date.now();
 	}
 
 	function handshake(result) {
