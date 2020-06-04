@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/peebles/gamesparks-node#readme",
   "dependencies": {
-    "websocket":"1.0.26"
+    "websocket": "1.0.31"
   }
 }
