@@ -59,5 +59,7 @@ exports.WebSocket.prototype.send = function(data) {
 };
 
 exports.WebSocket.prototype.close = function() {
-	this.connection.close();
+	if (this.connection) {
+		this.connection.close();
+	}
 };
